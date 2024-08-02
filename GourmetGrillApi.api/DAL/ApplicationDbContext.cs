@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using ProyectoFinalGourmetGrill.Data;
+﻿using Microsoft.EntityFrameworkCore;
 using Shared.Models;
 
 namespace GourmetGrillApi.api.DAL;
