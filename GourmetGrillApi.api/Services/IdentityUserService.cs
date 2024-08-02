@@ -1,6 +1,4 @@
-﻿
-using ProyectoFinalGourmetGrill.Components.Account;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using GourmetGrillApi.api.DAL;
 
