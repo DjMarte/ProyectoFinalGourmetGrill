@@ -25,11 +25,6 @@ builder.Services.AddDataProtection();
  * servicios de ASP.NET Core. Este mecanismo es fundamental para varias funcionalidades de seguridad en ASP.NET Core, como la 
  * protección de cookies de autenticación, tokens antifalsificación y almacenamiento seguro de datos sensibles.*/
 
-// Add HttpClient
-//builder.Services.AddScoped(a => new HttpClient
-//{
-//    BaseAddress = new Uri(builder.Configuration.GetSection("Uri").Value!)
-//});
 
 //Cors
 
