@@ -13,9 +13,9 @@ public class Productos
     public int ProductoId { get; set; }
 
     [ForeignKey("Categorias")]
+    [Required(ErrorMessage = "Se Requiere una Categoria")]
+    [Range(1,10, ErrorMessage = "Seleccione una Categoria")]
     public int CategoriaId { get; set; }
-
-   // [Required(ErrorMessage = "Se Requiere una Categoria")]
     public CategoriaProductos? Categoria { get; set; }
 
     [Required(ErrorMessage = "Se Requiere un Nombre")]
