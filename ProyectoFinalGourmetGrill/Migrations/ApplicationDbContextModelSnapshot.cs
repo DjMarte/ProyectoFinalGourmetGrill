@@ -396,9 +396,6 @@ namespace ProyectoFinalGourmetGrill.Migrations
                     b.Property<int>("OrdenId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OrdenesDetalleId")
-                        .HasColumnType("int");
-
                     b.Property<float>("Precio")
                         .HasColumnType("real");
 
@@ -407,7 +404,7 @@ namespace ProyectoFinalGourmetGrill.Migrations
 
                     b.HasKey("DetalleId");
 
-                    b.HasIndex("OrdenesDetalleId");
+                    b.HasIndex("OrdenId");
 
                     b.HasIndex("ProductoId");
 
@@ -766,15 +763,19 @@ namespace ProyectoFinalGourmetGrill.Migrations
 
             modelBuilder.Entity("Shared.Models.OrdenesDetalle", b =>
                 {
-                    b.HasOne("Shared.Models.Ordenes", null)
+                    b.HasOne("Shared.Models.Ordenes", "Orden")
                         .WithMany("OrdenesDetalle")
-                        .HasForeignKey("OrdenesDetalleId");
+                        .HasForeignKey("OrdenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Shared.Models.Productos", "Producto")
                         .WithMany()
                         .HasForeignKey("ProductoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Orden");
 
                     b.Navigation("Producto");
                 });
