@@ -168,7 +168,6 @@
         ListaProductos = await productosService.GetAllObject();
     }
 
-    public void Notificacion(ToastType toastType, string message) => Mensaje.Add(CrearNotificacion(toastType, message));
 
     private void IncrementCount() {
         currentCount++;
@@ -257,6 +256,8 @@
         await JS.InvokeVoidAsync("localStorage.setItem", "orderDetails", detallesJson);
         navigation.NavigateTo($"/GourmetGrill/Pedido");
     }
+
+    public void Notificacion(ToastType toastType, string message) => Mensaje.Add(CrearNotificacion(toastType, message));
 
     private ToastMessage CrearNotificacion(ToastType toastType, string message)
     => new ToastMessage {
