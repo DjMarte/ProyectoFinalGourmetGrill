@@ -9,7 +9,7 @@
 @inject IJSRuntime JS
 @rendermode InteractiveServer
 
-
+<Toasts class="p-3" Messages="Mensaje" Delay="3000" Placement="ToastsPlacement.TopLeft" />
 @*Carrito*@
 <div class="sidebar">
     <div class="card-header text-center">
@@ -168,7 +168,6 @@
         ListaProductos = await productosService.GetAllObject();
     }
 
-    public void Notificacion(ToastType toastType, string message) => Mensaje.Add(notificacionService.ShowToast(toastType, message));
 
     private void IncrementCount() {
         currentCount++;
@@ -230,15 +229,12 @@
                     Cantidad = currentCount,
                     OrdenId = Orden.OrdenId
             };
-            Orden.OrdenesDetalle.Add(detallePedido);
-            
         }
         CerrarModal();
     }
 
     public void EliminarProducto(OrdenesDetalle detalle) {
-        Orden.OrdenesDetalle.Remove(detalle);
-        
+
     }
 
     public void CerrarModal() {
@@ -258,4 +254,15 @@
         await JS.InvokeVoidAsync("localStorage.setItem", "orderDetails", detallesJson);
         navigation.NavigateTo($"/GourmetGrill/Pedido");
     }
+
+    public void Notificacion(ToastType toastType, string message) => Mensaje.Add(CrearNotificacion(toastType, message));
+
+    private ToastMessage CrearNotificacion(ToastType toastType, string message)
+    => new ToastMessage {
+            Type = toastType,
+            Title = "Notificación",
+            AutoHide = true,
+            HelpText = $"{DateTime.Now}",
+            Message = message,
+        };
 }

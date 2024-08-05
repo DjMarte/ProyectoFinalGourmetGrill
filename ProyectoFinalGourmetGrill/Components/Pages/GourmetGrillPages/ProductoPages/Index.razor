@@ -1,4 +1,4 @@
-﻿@page "/GourmetGrill/Index"
+﻿@page "/GourmetGrill/Productos/Index"
 
 @using Shared.Interfaces
 @using Shared.Models
@@ -56,7 +56,7 @@
             </div>
             @*Tabla*@
             <div class="text-center mt-3">
-                <table class="table table-bordered">
+                <table class="table table-striped table-borderless">
                     <thead>
                         <tr class="bg-warning">
                             <th>Producto</th>
@@ -116,7 +116,7 @@
 
     public void MostrarPantallaCrear()
     {
-        NavigationManager.NavigateTo("/GourmetGrill/Create");
+        NavigationManager.NavigateTo("/GourmetGrill/Productos/Create");
     }
 
     public async Task Buscar()
@@ -178,6 +178,6 @@
 
     private void Editar(int ProductoId)
     {
-        NavigationManager.NavigateTo($"/GourmetGrill/Edit/{ProductoId}");
+        NavigationManager.NavigateTo($"/GourmetGrill/Productos/Edit/{ProductoId}");
     }
 }

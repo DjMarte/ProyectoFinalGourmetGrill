@@ -1,4 +1,4 @@
-﻿@page "/GourmetGrill/Create"
+﻿@page "/GourmetGrill/Productos/Create"
 @using Shared.Interfaces
 @using Shared.Models
 @inject IServer<Productos> productoService
@@ -9,6 +9,7 @@
 
 <PageTitle>Crear Producto</PageTitle>
 <EditForm Model="Producto" OnValidSubmit="Guardar">
+    <Toasts class="p-3" Messages="Mensaje" Delay="3000" Placement="ToastsPlacement.TopLeft" />
     <DataAnnotationsValidator />
     <ValidationSummary />
     <div class="container">
@@ -43,14 +44,14 @@
                     <div class="col-6">
                         @*Categoría*@
                         <label class="form-label" for="categoria"><strong>Categoría</strong></label>
-                        <InputSelect class="form-control" id="categoria" @bind-Value="SelectedCategoriaId">
+                        <InputSelect class="form-control" id="categoria" @bind-Value="Producto.CategoriaId">
                             <option value="">Seleccione una categoría</option>
                             @foreach (var categoria in Categorias)
                             {
                                 <option value="@categoria.CategoriaId">@categoria.Nombre</option>
                             }
                         </InputSelect>
-                        <ValidationMessage For="@(() => SelectedCategoriaId)" />
+                        <ValidationMessage For="@(() => Producto.CategoriaId)" />
                     </div>
                 </div>
                 <div class="row mt-2">
@@ -70,7 +71,7 @@
                     <div class="col-6">
                         @*Imagen URL*@
                         <label class="form-label" for="imagenUrl"><strong>Seleccione la Imagen del Producto</strong></label>
-                        <InputFile OnChange="UploadImagen" />
+                        <InputFile OnChange="CargarImagen" />
                         <ValidationMessage For="@(() => Producto.ImagenUrl)" />
                     </div>
                 </div>
@@ -84,13 +85,12 @@
     </div>
 </EditForm>
 
-@Mensaje
+
 
 @code {
     public Productos Producto { get; set; } = new Productos();
-    public string Mensaje { get; set; } = string.Empty;
+    public List<ToastMessage> Mensaje = new List<ToastMessage>();
     public List<CategoriaProductos> Categorias { get; set; } = new List<CategoriaProductos>();
-    public int SelectedCategoriaId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -98,26 +98,24 @@
     }
 
     public async Task Guardar()
-    {
-        Producto.CategoriaId = SelectedCategoriaId;
+    {        
 
         var result = await productoService.AddObject(Producto);
 
         if (result != null)
-        {
-            Mensaje = "Producto creado correctamente";
-            Producto = new Productos();
-            SelectedCategoriaId = 0;
+        {           
+            Notificacion(ToastType.Success, $"{Producto.Nombre} agregado Correctamente.");
+            Producto = new Productos();            
         }
         else
-        {
-            Mensaje = "Error al crear el producto";
+        {            
+            Notificacion(ToastType.Warning, $"Error al Guardar el Producto");
         }
     }
 
     public void Volver()
     {
-        Navigation.NavigateTo("/GourmetGrill/Index");
+        Navigation.NavigateTo("/GourmetGrill/Productos/Index");
     }
 
     private void ActualizarDisponibilidad(ChangeEventArgs e)
@@ -140,7 +138,7 @@
         }
     }
 
-    private async Task UploadImagen(InputFileChangeEventArgs e)
+    private async Task CargarImagen(InputFileChangeEventArgs e)
     {
         var imageFile = e.File;
 
@@ -155,4 +153,14 @@
             Producto.ImagenUrl = blobClient.Uri.ToString();
         }
     }
+
+    public void Notificacion(ToastType toastType, string message) => Mensaje.Add(CrearNotificacion(toastType, message));
+    private ToastMessage CrearNotificacion(ToastType toastType, string message)
+    => new ToastMessage {
+            Type = toastType,
+            Title = "Notificación",
+            AutoHide = true,
+            HelpText = $"{DateTime.Now}",
+            Message = message,
+        };
 }

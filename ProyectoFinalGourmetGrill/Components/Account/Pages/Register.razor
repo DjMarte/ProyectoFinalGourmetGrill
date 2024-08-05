@@ -35,6 +35,11 @@
                             <ValidationMessage For="() => Input.Email" class="text-danger" />
                         </div>
                         <div class="mb-3 text-white">
+                            <label for="nombre">Nombre</label>
+                            <InputText @bind-Value="Input.Nombre" class="form-control" id="nombre" autocomplete="nombre" aria-required="true" placeholder="Angel Luis" />
+                            <ValidationMessage For="() => Input.Nombre" class="text-danger" />
+                        </div>
+                        <div class="mb-3 text-white">
                             <label for="password">Password</label>
                             <InputText type="password" @bind-Value="Input.Password" class="form-control" id="password" autocomplete="new-password" aria-required="true" placeholder="password" />
                             <ValidationMessage For="() => Input.Password" class="text-danger" />
@@ -68,7 +73,7 @@
     public async Task RegisterUser(EditContext editContext)
     {
         var user = CreateUser();
-
+        user.Nombre = Input.Nombre;
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -130,6 +135,10 @@
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; } = "";
+
+        [Required]
+        [Display(Name = "Nombre")]
+        public string Nombre { get; set; } = "";
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
