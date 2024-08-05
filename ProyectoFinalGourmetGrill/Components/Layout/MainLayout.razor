@@ -1,6 +1,8 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
 
+
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopLeft" />
 <div class="page fondo">
     @* <div class="sidebar">
     <NavMenu />
@@ -12,39 +14,45 @@
                     <a href="/"></a>
                 </div>
 
-                <img src="https://stgourmetgrilldv001.blob.core.windows.net/gourmetweb/Logo.png" alt="Burguer" style="width: 50px; height: 50px; margin-right: 10px;"/>
+                <img src="https://stgourmetgrilldv001.blob.core.windows.net/gourmetweb/Logo.png" alt="Burguer" style="width: 50px; height: 50px; margin-right: 10px;" />
                 <div class="alinearTexto">
                     <p><strong>Gourmet Grill</strong></p>
                 </div>
                 <div class="col text-end">
                     @*Condiciones para los iconos en el top bar*@
-                    @if (currentRoute == "/")
-                    {
+                    @if (currentRoute == "/") {
                         <div>
                             <a href="Account/Login" class="btn btn-danger">Iniciar Sesi&oacute;n</a>
                             <a href="Account/Register" class="btn btn-warning">Registrar</a>
                         </div>
                     }
-                    @if (currentRoute == "/Account/Register")
-                    {
+                    @if (currentRoute == "/Account/Register") {
                         <div>
                             <a href="Account/Login" class="btn btn-danger">Iniciar Sesi&oacute;n</a>
                             <a href="/" class="btn btn-warning">Inicio</a>
                         </div>
                     }
-                    else if (currentRoute == "/Account/Login")
-                    {
+                    else if (currentRoute == "/Account/Login") {
                         <div>
                             <a href="Account/Register" class="btn btn-primary">Registrar</a>
                             <a href="/" class="btn btn-warning">Inicio</a>
                         </div>
                     }
-                    @if(currentRoute == "/GourmentGrill/Menu")
-                    {
+                    @if (currentRoute == "/GourmentGrill/Menu") {
                         <div>
                             <a href="/" class="btn btn-primary">Inicio</a>
                         </div>
                     }
+
+                    <form action="Account/Logout" method="post">
+                        <div class="col text-end">
+                            <AntiforgeryToken />
+                            <input type="hidden" name="ReturnUrl" />
+                            <button type="submit" class="btn btn-back-to-history">
+                                <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -64,28 +72,25 @@
 @code {
     private string currentRoute;
 
-    protected override void OnInitialized()
-    {
+
+    protected override void OnInitialized() {
         // Suscribirse al evento LocationChanged
         NavigationManager.LocationChanged += OnLocationChanged;
         UpdateCurrentRoute();
     }
 
-    private void UpdateCurrentRoute()
-    {
+    private void UpdateCurrentRoute() {
         var uri = new Uri(NavigationManager.Uri);
         currentRoute = uri.PathAndQuery;
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) {
         UpdateCurrentRoute();
         // Asegúrate de invocar un StateHasChanged si es necesario para actualizar la UI
         InvokeAsync(StateHasChanged);
     }
 
-    public void Dispose()
-    {
+    public void Dispose() {
         // Desuscribirse del evento cuando el componente se disponga
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
