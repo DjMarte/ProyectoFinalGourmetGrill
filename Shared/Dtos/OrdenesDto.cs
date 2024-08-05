@@ -16,5 +16,5 @@ public class OrdenesDto
     public string? Descripcion { get; set; }
     public string? Telefono { get; set; }
     public DateTime Fecha { get; set; }
-    public ICollection<OrdenesDetalleDto> ReparacionDetalle { get; set; } = new List<OrdenesDetalleDto>();
+    public ICollection<OrdenesDetalleDto> OrdenesDetalle { get; set; } = new List<OrdenesDetalleDto>();
 }

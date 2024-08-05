@@ -27,11 +27,11 @@ builder.Services.AddAuthentication(options => {
 })
     .AddIdentityCookies();
 
-// Configure DbContext with a connection string
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+// Configure DbContext with a connection string using IDbContextFactory
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ConStr")));
 
-//Blob Services
+// Blob Services
 var storageConnection = builder.Configuration["ConnectionStrings:GourmetGrill:Storage"];
 
 builder.Services.AddAzureClients(azureBuilder => {
@@ -79,9 +79,14 @@ else {
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+using (var scope = app.Services.CreateScope()) {
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    context.Database.Migrate();
+}
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
