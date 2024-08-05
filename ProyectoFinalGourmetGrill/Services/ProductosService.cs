@@ -4,6 +4,7 @@ using Shared.Interfaces;
 using Shared.Models;
 using System.Linq.Expressions;
 using System.Net.Http.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ProyectoFinalGourmetGrill.Services;
 
@@ -26,8 +27,10 @@ public class ProductosService(ApplicationDbContext _contexto) : IServer<Producto
     }
 
     public async Task<bool> UpdateObject(Productos producto) {
+        _contexto.Productos.Update(producto);
+        var modificado = await _contexto.SaveChangesAsync() > 0;
         _contexto.Entry(producto).State = EntityState.Modified;
-        return await _contexto.SaveChangesAsync() > 0;
+        return modificado;
     }
 
     public async Task<Productos?> Search(int productoId) {
@@ -42,6 +45,13 @@ public class ProductosService(ApplicationDbContext _contexto) : IServer<Producto
         _contexto.Productos.Remove(producto);
         return await _contexto.SaveChangesAsync() > 0;
     }
+
+    public async Task<bool> Exist(int id, string nombre) {
+        return await _contexto.Productos
+            .AnyAsync(p => p.ProductoId != id && p.Nombre.ToLower().Equals(nombre.ToLower()));
+
+    }
+
     public async Task<List<Productos>> GetObjectByCondition(Expression<Func<Productos, bool>> expression) {
         return await _contexto.Productos
             .AsNoTracking()
@@ -49,12 +59,4 @@ public class ProductosService(ApplicationDbContext _contexto) : IServer<Producto
             .ToListAsync();
     }
 
-    //public async Task<string?> GetCategoriaNombre(int productoId)
-    //{
-    //    var producto = await _contexto.Productos
-    //        .Include(p => p.CategoriaId)
-    //        .FirstOrDefaultAsync(p => p.ProductoId == productoId);
-
-    //    return producto.CategoriaId.;
-    //}
 }

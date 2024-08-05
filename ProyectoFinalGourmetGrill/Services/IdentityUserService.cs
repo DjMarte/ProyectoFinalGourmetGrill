@@ -4,8 +4,18 @@ using ProyectoFinalGourmetGrill.Data;
 
 namespace ProyectoFinalGourmetGrill.Services;
 
-public class IdentityUserService(UserManager<ApplicationUser> _userManager, RoleManager<IdentityRole> _roleManager, ApplicationDbContext _contexto)
+public class IdentityUserService
 {
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly ApplicationDbContext _contexto;
+
+    public IdentityUserService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext contexto) {
+        _userManager = userManager;
+        _roleManager = roleManager;
+        _contexto = contexto;
+    }
+
     public async Task<IdentityResult> CreateUserAsync(ApplicationUser user, string password) {
         user.EmailConfirmed = true;
         var result = await _userManager.CreateAsync(user, password);
@@ -39,21 +49,20 @@ public class IdentityUserService(UserManager<ApplicationUser> _userManager, Role
     }
 
     public async Task<bool> GetNickNameAsync(string user) {
-        return await _contexto.Users.FirstOrDefaultAsync(x => x.NickName == user) != null;
+        return await _contexto.Users.AnyAsync(x => x.NickName == user);
     }
 
     public async Task<bool> CedulaExistAsync(string user) {
-        return await _contexto.Users.FirstOrDefaultAsync(x => x.Cedula == user) != null;
+        return await _contexto.Users.AnyAsync(x => x.Cedula == user);
     }
 
     public async Task<IdentityRole> GetRoleAsync(ApplicationUser user) {
-        IdentityUserRole<string> roles = (await _contexto.UserRoles.FirstOrDefaultAsync(x => x.UserId == user.Id))!;
-
+        var roles = await _contexto.UserRoles.FirstOrDefaultAsync(x => x.UserId == user.Id);
         if (roles != null) {
-            return (await _contexto.Roles.FirstOrDefaultAsync(r => r.Id == roles.RoleId))!;
+            return await _contexto.Roles.FirstOrDefaultAsync(r => r.Id == roles.RoleId);
         }
         else {
-            return null!;
+            return null;
         }
     }
 
@@ -63,32 +72,13 @@ public class IdentityUserService(UserManager<ApplicationUser> _userManager, Role
             await _userManager.RemoveFromRoleAsync(user, existingRole);
         }
 
-        var existente = await _contexto.UserRoles.FirstOrDefaultAsync(x => x.UserId == user.Id);
-        if (existente == null) {
-            var role = await _contexto.Roles.FirstOrDefaultAsync(x => x.Name == newRoleName);
-            if (role == null) {
-                _contexto.Roles.Add(new IdentityRole(newRoleName));
-                await _contexto.SaveChangesAsync();
-                var role2 = await _contexto.Roles.FirstOrDefaultAsync(x => x.Name == newRoleName);
-                _contexto.UserRoles.Add(new IdentityUserRole<string> { UserId = user.Id, RoleId = role2!.Id });
-            }
-            else {
-                _contexto.UserRoles.Add(new IdentityUserRole<string> { UserId = user.Id, RoleId = role!.Id });
-            }
+        var role = await _contexto.Roles.FirstOrDefaultAsync(x => x.Name == newRoleName);
+        if (role == null) {
+            await _roleManager.CreateAsync(new IdentityRole(newRoleName));
+            role = await _contexto.Roles.FirstOrDefaultAsync(x => x.Name == newRoleName);
         }
-        else {
-            _contexto.UserRoles.Remove(existente);
-            var role = await _contexto.Roles.FirstOrDefaultAsync(x => x.Name == newRoleName);
-            if (role == null) {
-                _contexto.Roles.Add(new IdentityRole(newRoleName));
-                await _contexto.SaveChangesAsync();
-                var role2 = await _contexto.Roles.FirstOrDefaultAsync(x => x.Name == newRoleName);
-                _contexto.UserRoles.Add(new IdentityUserRole<string> { UserId = user.Id, RoleId = role2!.Id });
-            }
-            else {
-                _contexto.UserRoles.Add(new IdentityUserRole<string> { UserId = user.Id, RoleId = role!.Id });
-            }
-        }
+
+        _contexto.UserRoles.Add(new IdentityUserRole<string> { UserId = user.Id, RoleId = role.Id });
         return await _contexto.SaveChangesAsync() > 0;
     }
 }

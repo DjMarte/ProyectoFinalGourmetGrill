@@ -36,6 +36,12 @@ public class VentasService(ApplicationDbContext _contexto) : IServer<Ventas>
         _contexto.Ventas.Remove(venta);
         return await _contexto.SaveChangesAsync() > 0;
     }
+
+    public async Task<bool> Exist(int id, string? nombre) {
+        return await _contexto.Ventas
+            .AnyAsync(p => p.OrdenId != id && p.NombreCliente.ToLower().Equals(nombre.ToLower()));
+
+    }
     public async Task<List<Ventas>> GetObjectByCondition(Expression<Func<Ventas, bool>> expression) {
         return await _contexto.Ventas.Include(v => v.VentasDetalle)
             .AsNoTracking()

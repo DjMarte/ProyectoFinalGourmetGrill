@@ -57,6 +57,12 @@ public class OrdenesService(ApplicationDbContext _contexto) : IServer<Ordenes>
         return true;
     }
 
+    public async Task<bool> Exist(int id, string? nombre) {
+        return await _contexto.Ordenes
+            .AnyAsync(p => p.OrdenId != id && p.NombreCliente.ToLower().Equals(nombre.ToLower()));
+
+    }
+
     public Task<List<Ordenes>> GetObjectByCondition(Expression<Func<Ordenes, bool>> expression) {
         return _contexto.Ordenes
             .Include(d => d.OrdenesDetalle)

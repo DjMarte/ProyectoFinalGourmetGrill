@@ -35,6 +35,11 @@ public class CategoriaProductosService(ApplicationDbContext _contexto) : IServer
         _contexto.CategoriaProductos.Remove(categoria);
         return await _contexto.SaveChangesAsync() > 0;
     }
+    public async Task<bool> Exist(int id, string? nombre) {
+        return await _contexto.CategoriaProductos
+            .AnyAsync(p => p.CategoriaId != id && p.Nombre.ToLower().Equals(nombre.ToLower()));
+
+    }
     public async Task<List<CategoriaProductos>> GetObjectByCondition(Expression<Func<CategoriaProductos, bool>> expression) {
         return await _contexto.CategoriaProductos.
             AsNoTracking()
