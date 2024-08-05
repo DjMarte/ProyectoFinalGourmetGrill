@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ProyectoFinalGourmetGrill.Migrations
 {
     /// <inheritdoc />
-    public partial class Inicial : Migration
+    public partial class Segunda : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -280,17 +280,17 @@ namespace ProyectoFinalGourmetGrill.Migrations
                     OrdenId = table.Column<int>(type: "int", nullable: false),
                     ProductoId = table.Column<int>(type: "int", nullable: false),
                     Precio = table.Column<float>(type: "real", nullable: false),
-                    Cantidad = table.Column<int>(type: "int", nullable: false),
-                    OrdenesDetalleId = table.Column<int>(type: "int", nullable: true)
+                    Cantidad = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OrdenesDetalle", x => x.DetalleId);
                     table.ForeignKey(
-                        name: "FK_OrdenesDetalle_Ordenes_OrdenesDetalleId",
-                        column: x => x.OrdenesDetalleId,
+                        name: "FK_OrdenesDetalle_Ordenes_OrdenId",
+                        column: x => x.OrdenId,
                         principalTable: "Ordenes",
-                        principalColumn: "OrdenId");
+                        principalColumn: "OrdenId",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_OrdenesDetalle_Productos_ProductoId",
                         column: x => x.ProductoId,
@@ -420,9 +420,9 @@ namespace ProyectoFinalGourmetGrill.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrdenesDetalle_OrdenesDetalleId",
+                name: "IX_OrdenesDetalle_OrdenId",
                 table: "OrdenesDetalle",
-                column: "OrdenesDetalleId");
+                column: "OrdenId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrdenesDetalle_ProductoId",
