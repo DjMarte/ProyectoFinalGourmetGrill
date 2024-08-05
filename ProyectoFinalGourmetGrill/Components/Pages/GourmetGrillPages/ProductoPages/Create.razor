@@ -9,9 +9,9 @@
 
 <PageTitle>Crear Producto</PageTitle>
 <EditForm Model="Producto" OnValidSubmit="Guardar">
-    <Toasts class="p-3" Messages="Mensaje" Delay="3000" Placement="ToastsPlacement.TopLeft" />
     <DataAnnotationsValidator />
     <ValidationSummary />
+    <Toasts class="p-3" Messages="Mensaje" Delay="3000" Placement="ToastsPlacement.TopLeft" />
     <div class="container">
         <div class="card shadow-lg">
             @*Header*@
@@ -99,18 +99,29 @@
 
     public async Task Guardar()
     {        
+        if(!await Validar()) 
+        {
+            var result = await productoService.AddObject(Producto);
 
-        var result = await productoService.AddObject(Producto);
-
-        if (result != null)
-        {           
-            Notificacion(ToastType.Success, $"{Producto.Nombre} agregado Correctamente.");
-            Producto = new Productos();            
+            if (result != null) 
+            {
+                Notificacion(ToastType.Success, $"{Producto.Nombre} agregado Correctamente.");
+                Producto = new Productos();
+            }
+            else 
+            {
+                Notificacion(ToastType.Danger, $"Error al Guardar el Producto");
+            }
         }
         else
-        {            
-            Notificacion(ToastType.Warning, $"Error al Guardar el Producto");
+        {
+            Notificacion(ToastType.Warning, $"Ya Existe un Producto con este Nombre");
         }
+    }
+
+    public async Task<bool> Validar() {
+        var existe = await productoService.Exist(Producto.ProductoId, Producto.Nombre);
+        return existe;
     }
 
     public void Volver()
