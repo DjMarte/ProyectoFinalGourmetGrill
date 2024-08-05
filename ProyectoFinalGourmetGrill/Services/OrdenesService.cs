@@ -4,70 +4,90 @@ using Shared.Interfaces;
 using Shared.Models;
 using System.Linq.Expressions;
 
-namespace ProyectoFinalGourmetGrill.Services;
-
-public class OrdenesService(ApplicationDbContext _contexto) : IServer<Ordenes>
+namespace ProyectoFinalGourmetGrill.Services
 {
-    public Task<List<Ordenes>> GetAllObject() {
-        return _contexto.Ordenes
-            .Include(d => d.OrdenesDetalle)
-            .ToListAsync();
-    }
-    public async Task<Ordenes> GetObject(int id) {
-        return await _contexto.Ordenes
-            .Include(d => d.OrdenesDetalle)
-            .FirstOrDefaultAsync(r => r.OrdenId == id);
-    }
+    public class OrdenesService : IServer<Ordenes>
+    {
+        private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
 
-    public async Task<Ordenes> AddObject(Ordenes orden) {
-        _contexto.Ordenes.Add(orden);
-        await _contexto.SaveChangesAsync();
-        return orden;
-    }
-
-    public async Task<bool> UpdateObject(Ordenes orden) {
-        var detalle = await _contexto.OrdenesDetalle.Where(r => r.DetalleId == orden.OrdenId).ToListAsync();
-        foreach (var item in detalle) {
-            var producto = await _contexto.Productos.FindAsync(item.ProductoId);
-            producto!.Cantidad += item.Cantidad;
-            _contexto.Entry(producto).State = EntityState.Modified;
-            await _contexto.SaveChangesAsync();
+        public OrdenesService(IDbContextFactory<ApplicationDbContext> contextFactory) {
+            _contextFactory = contextFactory;
         }
 
-        if (orden.EstadoId != 4) {
-            foreach (var item in orden.OrdenesDetalle) {
-                var producto = await _contexto.Productos.FindAsync(item.ProductoId);
-                producto!.Cantidad -= item.Cantidad;
-                _contexto.Entry(producto).State = EntityState.Modified;
-                await _contexto.SaveChangesAsync();
+        public async Task<List<Ordenes>> GetAllObject() {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.Ordenes
+                .Include(d => d.OrdenesDetalle)
+                .ToListAsync();
+        }
+
+        public async Task<Ordenes> GetObject(int id) {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.Ordenes
+                .Include(d => d.OrdenesDetalle)
+                .FirstOrDefaultAsync(r => r.OrdenId == id);
+        }
+
+        public async Task<Ordenes> AddObject(Ordenes orden) {
+            using var context = _contextFactory.CreateDbContext();
+            context.Ordenes.Add(orden);
+            await context.SaveChangesAsync();
+            return orden;
+        }
+
+        public async Task<bool> UpdateObject(Ordenes orden) {
+            using var context = _contextFactory.CreateDbContext();
+
+            var detalle = await context.OrdenesDetalle.Where(r => r.DetalleId == orden.OrdenId).ToListAsync();
+            foreach (var item in detalle) {
+                var producto = await context.Productos.FindAsync(item.ProductoId);
+                if (producto != null) {
+                    producto.Cantidad += item.Cantidad;
+                    context.Entry(producto).State = EntityState.Modified;
+                    await context.SaveChangesAsync();
+                }
             }
+
+            if (orden.EstadoId != 4) {
+                foreach (var item in orden.OrdenesDetalle) {
+                    var producto = await context.Productos.FindAsync(item.ProductoId);
+                    if (producto != null) {
+                        producto.Cantidad -= item.Cantidad;
+                        context.Entry(producto).State = EntityState.Modified;
+                        await context.SaveChangesAsync();
+                    }
+                }
+            }
+
+            context.Entry(orden).State = EntityState.Modified;
+            return await context.SaveChangesAsync() > 0;
         }
-        _contexto.Entry(orden).State = EntityState.Modified;
-        return await _contexto.SaveChangesAsync() > 0;
-    }
 
-    public async Task<bool> DeleteObject(int id) {
-        var orden = await _contexto.Ordenes.FindAsync(id);
-        if (orden == null)
-            return false;
+        public async Task<bool> DeleteObject(int id) {
+            using var context = _contextFactory.CreateDbContext();
+            var orden = await context.Ordenes.FindAsync(id);
+            if (orden == null)
+                return false;
 
-        await _contexto.OrdenesDetalle.Where(r => r.OrdenId == id).ExecuteDeleteAsync();
-        _contexto.Ordenes.Remove(orden);
-        await _contexto.SaveChangesAsync();
-        return true;
-    }
+            await context.OrdenesDetalle.Where(r => r.OrdenId == id).ExecuteDeleteAsync();
+            context.Ordenes.Remove(orden);
+            await context.SaveChangesAsync();
+            return true;
+        }
 
-    public async Task<bool> Exist(int id, string? nombre) {
-        return await _contexto.Ordenes
-            .AnyAsync(p => p.OrdenId != id && p.NombreCliente.ToLower().Equals(nombre.ToLower()));
+        public async Task<bool> Exist(int id, string? nombre) {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.Ordenes
+                .AnyAsync(p => p.OrdenId != id && p.NombreCliente.ToLower().Equals(nombre.ToLower()));
+        }
 
-    }
-
-    public Task<List<Ordenes>> GetObjectByCondition(Expression<Func<Ordenes, bool>> expression) {
-        return _contexto.Ordenes
-            .Include(d => d.OrdenesDetalle)
-            .AsNoTracking()
-            .Where(expression)
-            .ToListAsync();
+        public async Task<List<Ordenes>> GetObjectByCondition(Expression<Func<Ordenes, bool>> expression) {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.Ordenes
+                .Include(d => d.OrdenesDetalle)
+                .AsNoTracking()
+                .Where(expression)
+                .ToListAsync();
+        }
     }
 }

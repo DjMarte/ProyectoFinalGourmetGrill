@@ -3,35 +3,47 @@ using Microsoft.EntityFrameworkCore;
 using ProyectoFinalGourmetGrill.Data;
 using Shared.Interfaces;
 
-namespace ProyectoFinalGourmetGrill.Services;
-
-public class RolesService(ApplicationDbContext _contexto) : IServerAsp<IdentityRole>
+namespace ProyectoFinalGourmetGrill.Services
 {
-    public async Task<List<IdentityRole>> GetAllObject() {
-        return await _contexto.Roles.ToListAsync();
-    }
+    public class RolesService : IServerAsp<IdentityRole>
+    {
+        private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
 
-    public async Task<IdentityRole> GetObject(string id) {
-        return (await _contexto.Roles.FindAsync(id))!;
-    }
-
-    public async Task<IdentityRole> AddObject(IdentityRole type) {
-        _contexto.Roles.Add(type);
-        await _contexto.SaveChangesAsync();
-        return type;
-    }
-
-    public async Task<bool> UpdateObject(IdentityRole type) {
-        _contexto.Entry(type).State = EntityState.Modified;
-        return await _contexto.SaveChangesAsync() > 0;
-    }
-
-    public async Task<bool> DeleteObject(string id) {
-        var user = await _contexto.Roles.FindAsync(id);
-        if (user == null) {
-            return false;
+        public RolesService(IDbContextFactory<ApplicationDbContext> contextFactory) {
+            _contextFactory = contextFactory;
         }
-        _contexto.Roles.Remove(user);
-        return await _contexto.SaveChangesAsync() > 0;
+
+        public async Task<List<IdentityRole>> GetAllObject() {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.Roles.ToListAsync();
+        }
+
+        public async Task<IdentityRole> GetObject(string id) {
+            using var context = _contextFactory.CreateDbContext();
+            return (await context.Roles.FindAsync(id))!;
+        }
+
+        public async Task<IdentityRole> AddObject(IdentityRole type) {
+            using var context = _contextFactory.CreateDbContext();
+            context.Roles.Add(type);
+            await context.SaveChangesAsync();
+            return type;
+        }
+
+        public async Task<bool> UpdateObject(IdentityRole type) {
+            using var context = _contextFactory.CreateDbContext();
+            context.Entry(type).State = EntityState.Modified;
+            return await context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> DeleteObject(string id) {
+            using var context = _contextFactory.CreateDbContext();
+            var user = await context.Roles.FindAsync(id);
+            if (user == null) {
+                return false;
+            }
+            context.Roles.Remove(user);
+            return await context.SaveChangesAsync() > 0;
+        }
     }
 }

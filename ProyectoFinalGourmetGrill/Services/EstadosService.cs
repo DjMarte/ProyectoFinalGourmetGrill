@@ -4,39 +4,51 @@ using Shared.Interfaces;
 using Shared.Models;
 using System.Linq.Expressions;
 
-namespace ProyectoFinalGourmetGrill.Services;
-
-public class EstadosService(ApplicationDbContext _contexto) : IServer<Estados>
+namespace ProyectoFinalGourmetGrill.Services
 {
-    public async Task<List<Estados>> GetAllObject() {
-        return await _contexto.Estados.ToListAsync();
-    }
+    public class EstadosService : IServer<Estados>
+    {
+        private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
 
-    public Task<Estados> GetObject(int id) {
-        return (_contexto.Estados.FirstOrDefaultAsync(x => x.EstadoId == id))!;
-    }
+        public EstadosService(IDbContextFactory<ApplicationDbContext> contextFactory) {
+            _contextFactory = contextFactory;
+        }
 
-    public Task<bool> UpdateObject(Estados type) {
-        throw new NotImplementedException();
-    }
-    public Task<Estados> AddObject(Estados type) {
-        throw new NotImplementedException();
-    }
+        public async Task<List<Estados>> GetAllObject() {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.Estados.ToListAsync();
+        }
 
-    public Task<bool> DeleteObject(int id) {
-        throw new NotImplementedException();
-    }
+        public async Task<Estados> GetObject(int id) {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.Estados.FirstOrDefaultAsync(x => x.EstadoId == id);
+        }
 
-    public async Task<bool> Exist(int id, string? nombre) {
-        return await _contexto.Estados
-            .AnyAsync(p => p.EstadoId != id && p.NombreEstado.ToLower().Equals(nombre.ToLower()));
+        public Task<bool> UpdateObject(Estados type) {
+            throw new NotImplementedException();
+        }
 
-    }
+        public Task<Estados> AddObject(Estados type) {
+            throw new NotImplementedException();
+        }
 
-    public Task<List<Estados>> GetObjectByCondition(Expression<Func<Estados, bool>> expression) {
-        return _contexto.Estados
-            .AsNoTracking()
-            .Where(expression)
-            .ToListAsync();
+        public Task<bool> DeleteObject(int id) {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> Exist(int id, string? nombre) {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.Estados
+                .AnyAsync(p => p.EstadoId != id && p.NombreEstado.ToLower().Equals(nombre.ToLower()));
+        }
+
+        public async Task<List<Estados>> GetObjectByCondition(Expression<Func<Estados, bool>> expression) {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.Estados
+                .AsNoTracking()
+                .Where(expression)
+                .ToListAsync();
+        }
     }
 }
+

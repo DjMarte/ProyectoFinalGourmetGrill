@@ -4,39 +4,50 @@ using Shared.Interfaces;
 using Shared.Models;
 using System.Linq.Expressions;
 
-namespace ProyectoFinalGourmetGrill.Services;
-
-public class MetodosPagosService(ApplicationDbContext _contexto) : IServer<MetodoPagos>
+namespace ProyectoFinalGourmetGrill.Services
 {
+    public class MetodosPagosService : IServer<MetodoPagos>
+    {
+        private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
 
-    public async Task<List<MetodoPagos>> GetAllObject() {
-        return await _contexto.MetodoPagos.ToListAsync();
-    }
+        public MetodosPagosService(IDbContextFactory<ApplicationDbContext> contextFactory) {
+            _contextFactory = contextFactory;
+        }
 
-    public Task<MetodoPagos> GetObject(int id) {
-        return _contexto.MetodoPagos.FirstOrDefaultAsync(x => x.MetodoPagoId == id);
-    }
+        public async Task<List<MetodoPagos>> GetAllObject() {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.MetodoPagos.ToListAsync();
+        }
 
-    public Task<bool> UpdateObject(MetodoPagos type) {
-        throw new NotImplementedException();
-    }
-    public Task<MetodoPagos> AddObject(MetodoPagos type) {
-        throw new NotImplementedException();
-    }
+        public async Task<MetodoPagos> GetObject(int id) {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.MetodoPagos.FirstOrDefaultAsync(x => x.MetodoPagoId == id);
+        }
 
-    public Task<bool> DeleteObject(int id) {
-        throw new NotImplementedException();
-    }
+        public Task<bool> UpdateObject(MetodoPagos type) {
+            throw new NotImplementedException();
+        }
 
-    public async Task<bool> Exist(int id, string? nombre) {
-        return await _contexto.MetodoPagos
-            .AnyAsync(p => p.MetodoPagoId != id && p.Nombre.ToLower().Equals(nombre.ToLower()));
+        public Task<MetodoPagos> AddObject(MetodoPagos type) {
+            throw new NotImplementedException();
+        }
 
-    }
-    public Task<List<MetodoPagos>> GetObjectByCondition(Expression<Func<MetodoPagos, bool>> expression) {
-        return _contexto.MetodoPagos
-            .AsNoTracking()
-            .Where(expression)
-            .ToListAsync();
+        public Task<bool> DeleteObject(int id) {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> Exist(int id, string? nombre) {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.MetodoPagos
+                .AnyAsync(p => p.MetodoPagoId != id && p.Nombre.ToLower().Equals(nombre.ToLower()));
+        }
+
+        public async Task<List<MetodoPagos>> GetObjectByCondition(Expression<Func<MetodoPagos, bool>> expression) {
+            using var context = _contextFactory.CreateDbContext();
+            return await context.MetodoPagos
+                .AsNoTracking()
+                .Where(expression)
+                .ToListAsync();
+        }
     }
 }
