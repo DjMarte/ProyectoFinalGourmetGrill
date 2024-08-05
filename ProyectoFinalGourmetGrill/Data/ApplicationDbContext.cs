@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Shared.Models;
@@ -14,6 +15,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<OrdenesDetalle> OrdenesDetalle { get; set; }
     public DbSet<Ventas> Ventas { get; set; }
     public DbSet<VentasDetalle> VentasDetalle { get; set; }
+
     public DbSet<Estados> Estados { get; set; }
     public DbSet<MetodoPagos> MetodoPagos { get; set; }
 
@@ -33,6 +35,43 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasOne(d => d.Producto)
             .WithMany()
             .HasForeignKey(d => d.ProductoId);
+    }
+
+    private void SeedAdminUser(ModelBuilder modelBuilder) {
+        // Any GUID ID will work, we can generate a new GUID using tools or Visual Studio
+        const string ADMIN_ID = "1a2b3c4d-5e6f-7g8h-9i0j-k1l2m3n4o5p6";
+        const string ADMINROLEID = "Admin";
+
+        // Create the admin role
+        modelBuilder.Entity<IdentityRole>().HasData(new IdentityRole {
+            Id = ADMINROLEID,
+            Name = "Enel",
+            NormalizedName = "ENEL"
+        });
+
+        // Create the admin user
+        var hasher = new PasswordHasher<ApplicationUser>();
+        var adminUser = new ApplicationUser {
+            Id = ADMIN_ID,
+            UserName = "EnelAdmin",
+            NormalizedUserName = "ENELADMIN",
+            Email = "eneladmin@sag.com",
+            NormalizedEmail = "ENELADMIN@SAG.COM",
+            EmailConfirmed = true,
+            Nombre = "Enel",
+            Apellido = "Almonte",
+            NickName = "EnelAdmin",
+            SecurityStamp = Guid.NewGuid().ToString()
+        };
+        adminUser.PasswordHash = hasher.HashPassword(adminUser, "Admin123!");
+
+        modelBuilder.Entity<ApplicationUser>().HasData(adminUser);
+
+        // Assign the admin role to the admin user
+        modelBuilder.Entity<IdentityUserRole<string>>().HasData(new IdentityUserRole<string> {
+            RoleId = ADMINROLEID,
+            UserId = ADMIN_ID
+        });
     }
 
     public void ConfigureGeneralModel(ModelBuilder modelBuilder) {
