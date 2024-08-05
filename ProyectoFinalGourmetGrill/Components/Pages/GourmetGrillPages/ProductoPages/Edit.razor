@@ -1,6 +1,8 @@
 ﻿@page "/GourmetGrill/Productos/Edit/{ProductoId:int}"
 @using Shared.Interfaces
 @using Shared.Models
+@attribute [Authorize(Roles = "Admin")]
+
 @inject IServer<Productos> productoService
 @inject IServer<CategoriaProductos> categoriaService
 @inject BlobServiceClient blobService
@@ -59,10 +61,6 @@
                                 <ValidationMessage For="@(() => Producto.CategoriaId)" />
                             </div>
                         </div>
-                        <div class="row mt-2">
-                            <div class="col-12">
-                            </div>
-                        </div>
                     </div>
                     <div class="col-4 text-center">
                         @if (!string.IsNullOrEmpty(Producto.ImagenUrl)) {
@@ -98,7 +96,6 @@
     }
 
     public async Task Editar() {
-
         if (!await Validar()) {
             var result = await productoService.UpdateObject(Producto);
             if (result) {
@@ -108,12 +105,10 @@
             else {
                 Notificacion(ToastType.Warning, $"Error al Editar el Producto");
             }
-
         }
         else {
             Notificacion(ToastType.Warning, $"Ya Existe un Producto con este Nombre");
         }
-
     }
 
     public async Task<bool> Validar() {
