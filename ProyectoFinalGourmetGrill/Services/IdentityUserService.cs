@@ -7,11 +7,13 @@ namespace ProyectoFinalGourmetGrill.Services;
 public class IdentityUserService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager; // Añadir SignInManager
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ApplicationDbContext _contexto;
 
-    public IdentityUserService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext contexto) {
+    public IdentityUserService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext contexto) {
         _userManager = userManager;
+        _signInManager = signInManager; // Inicializar SignInManager
         _roleManager = roleManager;
         _contexto = contexto;
     }
@@ -33,7 +35,6 @@ public class IdentityUserService
         var clienteRole = await _roleManager.FindByNameAsync("Cliente");
         if (clienteRole == null) {
             await _roleManager.CreateAsync(new IdentityRole("Cliente"));
-            await _userManager.AddToRoleAsync(user, "Cliente");
         }
         await _userManager.AddToRoleAsync(user, "Cliente");
         return result;
@@ -80,5 +81,11 @@ public class IdentityUserService
 
         _contexto.UserRoles.Add(new IdentityUserRole<string> { UserId = user.Id, RoleId = role.Id });
         return await _contexto.SaveChangesAsync() > 0;
+    }
+
+    // Método para iniciar sesión sin persistencia
+    public async Task<bool> SignInUserAsync(string email, string password, bool isPersistent) {
+        var result = await _signInManager.PasswordSignInAsync(email, password, isPersistent, lockoutOnFailure: false);
+        return result.Succeeded;
     }
 }
