@@ -6,32 +6,31 @@
 <div class="d-flex align-items-center justify-content-end">
     <AuthorizeView>
         <Authorized>
-            <div class="d-flex align-items-center justify-content-end">
-                <NavLink class="btn btn-primary mx-1" href="/">Home</NavLink>
-                <NavLink class="btn btn-secondary mx-1" href="/GourmetGrill/Menu">Menu</NavLink>
+            <div class="d-flex align-items-center justify-content-center">
+                <NavLink class="btn btn-link" href="/">Home</NavLink>
+                <NavLink class="btn btn-link" href="/GourmetGrill/Menu">Menu</NavLink>
                 <AuthorizeView Roles="Admin">
                     <Authorized Context="Admin">
-                        <NavLink class="btn btn-info mx-1" href="/GourmetGrill/Productos/Index">Inventario</NavLink>
-                        <NavLink class="btn btn-warning mx-1" href="/GourmetGrill/Ordenes/Index">Ordenes</NavLink>
+                        <NavLink class="btn btn-link" href="/GourmetGrill/Productos/Index">Inventario</NavLink>
+                        <NavLink class="btn btn-link" href="/GourmetGrill/Ordenes/Index">Ordenes</NavLink>
                     </Authorized>
                 </AuthorizeView>
+                <span class="btn btn-link text-black">USUARIO: @nickName </span>
                 <form action="Account/Logout" method="post">
                     <div class="col text-end">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" />
-                        <button type="submit" class="btn btn-danger mx-1">
-                            <span aria-hidden="true"></span> SALIR
-                        </button>
+                        <button type="submit" class="btn btn-outline-danger">
+                            <span  aria-hidden="true"></span> Salir </button>
                     </div>
-                </form>               
-                <span class="btn btn-light mx-1 text-dark">Bienvenido, @nickName</span>
+                </form>
             </div>
         </Authorized>
         <NotAuthorized>
-            <div class="d-flex align-items-center justify-content-end">
-                <NavLink class="btn btn-primary mx-1" href="/">Inicio</NavLink>
-                <NavLink class="btn btn-success mx-1" href="Account/Login">Login</NavLink>
-                <NavLink class="btn btn-warning mx-1" href="Account/Register">Registrarse</NavLink>
+            <div class="d-flex align-items-center justify-content-center">
+                <NavLink class="btn btn-link" href="/">Home</NavLink>
+                <NavLink class="btn btn-link" href="Account/Login">Login</NavLink>
+                <NavLink class="btn btn-link" href="Account/Register">Register</NavLink>
             </div>
         </NotAuthorized>
     </AuthorizeView>
