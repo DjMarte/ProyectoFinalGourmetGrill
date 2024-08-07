@@ -1,6 +1,8 @@
 ﻿@page "/GourmetGrill/Productos/Create"
 @using Shared.Interfaces
 @using Shared.Models
+@attribute [Authorize(Roles = "Admin")]
+
 @inject IServer<Productos> productoService
 @inject IServer<CategoriaProductos> categoriaService
 @inject BlobServiceClient blobService
@@ -9,9 +11,9 @@
 
 <PageTitle>Crear Producto</PageTitle>
 <EditForm Model="Producto" OnValidSubmit="Guardar">
-    <Toasts class="p-3" Messages="Mensaje" Delay="3000" Placement="ToastsPlacement.TopLeft" />
     <DataAnnotationsValidator />
     <ValidationSummary />
+    <Toasts class="p-3" Messages="Mensaje" Delay="3000" Placement="ToastsPlacement.TopLeft" />
     <div class="container">
         <div class="card shadow-lg">
             @*Header*@
@@ -40,14 +42,13 @@
                         <label class="form-label" for="cantidad"><strong>Cantidad</strong></label>
                         <InputNumber class="form-control" id="cantidad" @bind-Value="Producto.Cantidad" @oninput="ActualizarDisponibilidad"></InputNumber>
                         <ValidationMessage For="@(() => Producto.Cantidad)" />
-                    </div>    
+                    </div>
                     <div class="col-6">
                         @*Categoría*@
                         <label class="form-label" for="categoria"><strong>Categoría</strong></label>
                         <InputSelect class="form-control" id="categoria" @bind-Value="Producto.CategoriaId">
                             <option value="">Seleccione una categoría</option>
-                            @foreach (var categoria in Categorias)
-                            {
+                            @foreach (var categoria in Categorias) {
                                 <option value="@categoria.CategoriaId">@categoria.Nombre</option>
                             }
                         </InputSelect>
@@ -60,7 +61,7 @@
                         <label class="form-label" for="precio"><strong>Precio</strong></label>
                         <InputNumber class="form-control" id="precio" @bind-Value="Producto.Precio" @oninput="ActualizarITBIS"></InputNumber>
                         <ValidationMessage For="@(() => Producto.Precio)" />
-                    </div>                    
+                    </div>
                     <div class="col-6">
                         @*ITBIS*@
                         <label class="form-label" for="itbis"><strong>ITBIS</strong></label>
@@ -85,65 +86,60 @@
     </div>
 </EditForm>
 
-
-
 @code {
     public Productos Producto { get; set; } = new Productos();
     public List<ToastMessage> Mensaje = new List<ToastMessage>();
     public List<CategoriaProductos> Categorias { get; set; } = new List<CategoriaProductos>();
 
-    protected override async Task OnInitializedAsync()
-    {
+    protected override async Task OnInitializedAsync() {
         Categorias = (await categoriaService.GetAllObject()).ToList();
     }
 
-    public async Task Guardar()
-    {        
+    public async Task Guardar() {
+        if (!await Validar()) {
+            var result = await productoService.AddObject(Producto);
 
-        var result = await productoService.AddObject(Producto);
-
-        if (result != null)
-        {           
-            Notificacion(ToastType.Success, $"{Producto.Nombre} agregado Correctamente.");
-            Producto = new Productos();            
+            if (result != null) {
+                Notificacion(ToastType.Success, $"{Producto.Nombre} agregado Correctamente.");
+                Producto = new Productos();
+            }
+            else {
+                Notificacion(ToastType.Danger, $"Error al Guardar el Producto");
+            }
         }
-        else
-        {            
-            Notificacion(ToastType.Warning, $"Error al Guardar el Producto");
+        else {
+            Notificacion(ToastType.Warning, $"Ya Existe un Producto con este Nombre");
         }
     }
 
-    public void Volver()
-    {
+    public async Task<bool> Validar() {
+        var existe = await productoService.Exist(Producto.ProductoId, Producto.Nombre);
+        return existe;
+    }
+
+    public void Volver() {
         Navigation.NavigateTo("/GourmetGrill/Productos/Index");
     }
 
-    private void ActualizarDisponibilidad(ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out int cantidad))
-        {
+    private void ActualizarDisponibilidad(ChangeEventArgs e) {
+        if (int.TryParse(e.Value?.ToString(), out int cantidad)) {
             Producto.Disponible = cantidad > 0;
         }
-        else
-        {
+        else {
             Producto.Disponible = false;
         }
     }
 
-    private void ActualizarITBIS(ChangeEventArgs e)
-    {
-        if (decimal.TryParse(e.Value?.ToString(), out decimal precio))
-        {
+    private void ActualizarITBIS(ChangeEventArgs e) {
+        if (decimal.TryParse(e.Value?.ToString(), out decimal precio)) {
             Producto.ITBIS = (float)(precio * 0.18m);
         }
     }
 
-    private async Task CargarImagen(InputFileChangeEventArgs e)
-    {
+    private async Task CargarImagen(InputFileChangeEventArgs e) {
         var imageFile = e.File;
 
-        if (imageFile != null)
-        {
+        if (imageFile != null) {
             var containerClient = blobService.GetBlobContainerClient("gourmetweb");
             var blobClient = containerClient.GetBlobClient(imageFile.Name);
 
