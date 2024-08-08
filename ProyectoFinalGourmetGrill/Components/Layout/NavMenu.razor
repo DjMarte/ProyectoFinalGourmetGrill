@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿﻿@using Microsoft.AspNetCore.Identity
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<ApplicationUser> UserManager
@@ -21,7 +21,8 @@
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" />
                         <button type="submit" class="btn btn-outline-danger">
-                            <span  aria-hidden="true"></span> Salir </button>
+                            <span aria-hidden="true"></span> Salir
+                        </button>
                     </div>
                 </form>
             </div>
