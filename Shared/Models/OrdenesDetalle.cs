@@ -19,7 +19,7 @@ public class OrdenesDetalle
     [ForeignKey("Productos")]
     public int ProductoId { get; set; }
 
-    [Required(ErrorMessage = "Un Producto es requerido")]
+    //[Required(ErrorMessage = "Un Producto es requerido")]
     public Productos? Producto { get; set; }
 
     [Required(ErrorMessage = "Indique el Precio")]
