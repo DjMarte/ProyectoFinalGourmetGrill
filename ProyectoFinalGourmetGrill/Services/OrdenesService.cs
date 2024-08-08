@@ -18,6 +18,7 @@ namespace ProyectoFinalGourmetGrill.Services
             using var context = _contextFactory.CreateDbContext();
             return await context.Ordenes
                 .Include(d => d.OrdenesDetalle)
+                    .Include(m => m.MetodoPago)
                 .ToListAsync();
         }
 
@@ -25,6 +26,7 @@ namespace ProyectoFinalGourmetGrill.Services
             using var context = _contextFactory.CreateDbContext();
             return await context.Ordenes
                 .Include(d => d.OrdenesDetalle)
+                    .Include(m => m.MetodoPago)
                 .FirstOrDefaultAsync(r => r.OrdenId == id);
         }
 
